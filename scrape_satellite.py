@@ -10,17 +10,16 @@ import requests
 import urllib3
 from tqdm import tqdm
 
-LOOK_BACK_DAYS = 21
-MAX_RETRIES: int = 10
 
-
-def main(output_folder: Path):
+def main(output_folder: Path, max_retries: int, look_back_days: int):
     img_file_list: List[str] = output_folder.glob("*.jpg")
     img_file_list = [os.path.basename(file_path) for file_path in img_file_list]
     img_file_set: Set[str] = set(img_file_list)
 
-    end_time = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0, second=0, minute=0)
-    start_time = end_time - datetime.timedelta(days=LOOK_BACK_DAYS)
+    end_time = datetime.datetime.now(datetime.timezone.utc).replace(
+        microsecond=0, second=0, minute=0
+    )
+    start_time = end_time - datetime.timedelta(days=look_back_days)
 
     date_range = pd.date_range(start=start_time, end=end_time, freq="10T")
 
@@ -33,7 +32,7 @@ def main(output_folder: Path):
                 succeeded: bool = False
                 url = f"http://rammb.cira.colostate.edu/ramsdis/online/images/hi_res/himawari-8/full_disk_ahi_true_color/full_disk_ahi_true_color_{date.strftime('%Y%m%d%H%M%S')}.jpg"
                 save_file_path: Path = output_folder / file_name
-                while not succeeded and try_counter < MAX_RETRIES:
+                while not succeeded and try_counter < max_retries:
                     try:
                         response = requests.get(url, stream=True, timeout=0.5)
                         if response.status_code == 200:
@@ -61,7 +60,23 @@ def main(output_folder: Path):
 if __name__ == "__main__":
     parser: argparse.ArgumentParser = argparse.ArgumentParser()
     parser.add_argument(
-        "output_folder", help="The name of the folder to save the images to."
+        "output_folder", help="The name of the folder to save the images to.", type=str
+    )
+    parser.add_argument(
+        "-max_retries",
+        help="The maximum number of times to attempt to download an image",
+        type=int,
+        default=10,
+    )
+    parser.add_argument(
+        "-look_back_days",
+        help="The number of days before present to search back from",
+        type=int,
+        default=21,
     )
     args = parser.parse_args()
-    main(Path(args.output_folder))
+    main(
+        output_folder=Path(args.output_folder),
+        max_retries=args.max_retries,
+        look_back_days=args.look_back_days,
+    )
