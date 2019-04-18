@@ -48,7 +48,7 @@ def main(output_folder: Path, max_retries: int, look_back_days: int):
                         urllib3.exceptions.ReadTimeoutError,
                         ConnectionResetError,
                     ):
-                        try_counter += 1
+                        pass
                 # Delete any partially downloaded files that didn't complete
                 if not succeeded and os.path.isfile(save_file_path):
                     try:
