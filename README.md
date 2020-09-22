@@ -2,6 +2,8 @@
 
 Python script to scrape Himawari-8 images from the Regional and Mesoscale Meteorology Branch
 
+![Example](images/202009210250.jpg)
+
 ## Usage
 
 This is a command line script which requires a path to save images to as a mandatory parameter first and three optional parameters to define how many times to attempt to download an image, how many days before present to retrieve images, and how many parallel jobs to use to download the images. The script is semi-smart and will check the path to see which images have already been downloaded and it won't re-download and overwrite images you already have.
