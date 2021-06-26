@@ -12,13 +12,13 @@ This script can be run by:
 
 ### Windows
 
-python scrape_satellite.py C:\Users\Me\full_disk_ahi_true_color -max_retries 5 -look_back_days 15 -n_jobs 2
+python scrape_satellite.py C:\Users\Me\full_disk_ahi_true_color -max_retries 5 -timeout 5 -look_back_days 15 -n_jobs 2
 
 ### Mac / Linux
 
-python3 scrape_satellite.py ~/full_disk_ahi_true_color -max_retries 5 -look_back_days 15 -n_jobs 2
+python scrape_satellite.py ~/full_disk_ahi_true_color -max_retries 5 -timeout 5 -look_back_days 15 -n_jobs 2
 
-The max_retries, look_back_days, and n_jobs parameters are optional. They default to 10 retries,  21 days, and -1 jobs respectively (-1 jobs means create as many jobs as there are virtual cores on the machine). The Regional and Mesoscale Meteorology Branch only make 28 days of images available so setting look_back_days larger than that won't help.
+The max_retries, timeout, look_back_days, and n_jobs parameters are optional. They default to 10 retries, 5 second timeout, 21 day look back, and -1 jobs respectively (-1 jobs means create as many jobs as there are virtual cores on the machine). The Regional and Mesoscale Meteorology Branch only make 28 days of images available so setting look_back_days larger than that won't help.
 
 ## Requirements
 

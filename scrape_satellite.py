@@ -12,14 +12,14 @@ import urllib3
 from tqdm import tqdm
 
 
-def main(output_folder: Path, max_retries: int, look_back_days: int, n_jobs: int):
+def main(output_folder: Path, max_retries: int, timeout: float, look_back_days: int, n_jobs: int):
     """
 
-    :param output_folder:
-    :param max_retries:
-    :param look_back_days:
-    :param n_jobs:
-    :return:
+    :param output_folder: Path to the folder to save images too
+    :param max_retries: Maximum number of attempts to make to download the image
+    :param timeout: Maximum number of seconds to wait for a response
+    :param look_back_days: Number of days before present time to look for image
+    :param n_jobs: Number of processes to spin up to download images
     """
     img_file_paths: Iterator[Path] = output_folder.glob("*.jpg")
     img_file_list: List[str] = [os.path.basename(file_path) for file_path in img_file_paths]
@@ -37,7 +37,7 @@ def main(output_folder: Path, max_retries: int, look_back_days: int, n_jobs: int
     ]
 
     Parallel(n_jobs=n_jobs)(
-        delayed(download_file)(date_file_name, max_retries, output_folder)
+        delayed(download_file)(date_file_name, max_retries, timeout, output_folder)
         for date_file_name in tqdm(download_file_list)
     )
 
@@ -55,20 +55,20 @@ def get_file_name(start_time: datetime.datetime, end_time: datetime.datetime) ->
 
 
 def download_file(
-    date_file_name: Tuple[pd.Timestamp, str], max_retries: int, output_folder: Path
+    date_file_name: Tuple[pd.Timestamp, str], max_retries: int, timeout: float, output_folder: Path
 ):
     """
 
-    :param date_file_name:
-    :param max_retries:
-    :param output_folder:
-    :return:
+    :param date_file_name: Timestamp of the image to download and the name of the file to save
+    :param max_retries: Maximum number of attempts to make to download the image
+    :param timeout: Maximum number of seconds to wait for a response
+    :param output_folder: Path to the folder to save images too
     """
     date = date_file_name[0]
     file_name = date_file_name[1]
     try_counter: int = 0
     succeeded: bool = False
-    url = f"http://rammb.cira.colostate.edu/ramsdis/online/images/hi_res/himawari-8/full_disk_ahi_true_color/full_disk_ahi_true_color_{date.strftime('%Y%m%d%H%M%S')}.jpg"
+    url = f"https://rammb.cira.colostate.edu/ramsdis/online/images/hi_res/himawari-8/full_disk_ahi_true_color/full_disk_ahi_true_color_{date.strftime('%Y%m%d%H%M%S')}.jpg"
     save_file_path: Path = output_folder / file_name
     while not succeeded and try_counter < max_retries:
         try:
@@ -78,7 +78,7 @@ def download_file(
                 resume_header = {"Range": f"bytes={offset}-"}
 
             response = requests.get(
-                url=url, headers=resume_header, stream=True, timeout=0.5
+                url=url, headers=resume_header, stream=True, timeout=timeout
             )
             if response.status_code in [
                 requests.codes.ok,
@@ -99,7 +99,7 @@ def download_file(
             urllib3.exceptions.ProtocolError,
             urllib3.exceptions.ReadTimeoutError,
             ConnectionResetError,
-        ):
+        ) as error:
             pass
     # Delete any partially downloaded files that didn't complete
     if not succeeded and os.path.isfile(save_file_path):
@@ -121,6 +121,12 @@ if __name__ == "__main__":
         default=10,
     )
     parser.add_argument(
+        "-timeout",
+        help="Maximum number of seconds to wait for a response",
+        type=float,
+        default=5,
+    )
+    parser.add_argument(
         "-look_back_days",
         help="The number of days before present to search back from",
         type=int,
@@ -136,6 +142,7 @@ if __name__ == "__main__":
     main(
         output_folder=Path(args.output_folder),
         max_retries=args.max_retries,
+        timeout=args.timeout,
         look_back_days=args.look_back_days,
         n_jobs=args.n_jobs,
     )
