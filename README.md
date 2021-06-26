@@ -2,7 +2,7 @@
 
 Python script to scrape Himawari-8 images from the Regional and Mesoscale Meteorology Branch
 
-![Example](images/202009210250.jpg)
+![Example](images/202009210250.png)
 
 ## Usage
 
