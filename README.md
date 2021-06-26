@@ -1,6 +1,6 @@
 # scrape-himawari-8
 
-Python script to scrape Himawari-8 images from the Regional and Mesoscale Meteorology Branch
+Python script to scrape Himawari-8 images from the [Regional and Mesoscale Meteorology Branch](https://rammb2.cira.colostate.edu/)
 
 ![Example](images/202009210250.png)
 
